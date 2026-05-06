@@ -45,7 +45,13 @@ RUN if grep -i -q alpine /etc/issue; then \
           # This is required to allow building on arm64 due to https://github.com/golang/go/issues/22040
           binutils-gold \
           # Install build dependencies
-          gcc g++ make git; \
+          # binarybeachio: bash added — Grafana's `make build-go` target invokes
+          # scripts/go-workspace/update-workspace.sh which has a `#!/usr/bin/env bash`
+          # shebang. Alpine ships only busybox sh, so without this the build fails
+          # with `make: bash: No such file or directory`. Upstream's CI uses the
+          # tgz-builder path (consuming prebuilt tarballs from Drone), so this
+          # go-builder path is exercised only by from-source builders.
+          gcc g++ make git bash; \
     fi
 
 WORKDIR /tmp/grafana
