@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/grafana/grafana/pkg/infra/metrics"
+	"github.com/grafana/grafana/pkg/middleware"
 	"github.com/grafana/grafana/pkg/middleware/cookies"
 	"github.com/grafana/grafana/pkg/services/authn"
 	contextmodel "github.com/grafana/grafana/pkg/services/contexthandler/model"
@@ -57,5 +58,16 @@ func (hs *HTTPServer) OAuthLogin(reqCtx *contextmodel.ReqContext) {
 	}
 
 	metrics.MApiLoginOAuth.Inc()
+
+	// binarybeachio: pin the _bb_edge_sub marker cookie to the oauth2-proxy
+	// edge identity so the BbEdgeIdentity middleware can detect a
+	// future identity-switch. Per
+	// docs/conventions/per-app-edge-identity-validation.md (in
+	// binarybeachio repo). Inert when the request didn't flow through
+	// oauth2-proxy (e.g., dev or break-glass): no header → no cookie set.
+	if edgeSub := reqCtx.Req.Header.Get(middleware.BbEdgeUserHeaderName); edgeSub != "" {
+		cookies.WriteCookie(reqCtx.Resp, middleware.BbEdgeSubCookieName, edgeSub, 0, hs.CookieOptionsFromCfg)
+	}
+
 	authn.HandleLoginRedirect(reqCtx.Req, reqCtx.Resp, hs.Cfg, identity, hs.ValidateRedirectTo)
 }

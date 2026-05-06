@@ -2,7 +2,7 @@
 
 binarybeachio fork of [grafana/grafana](https://github.com/grafana/grafana).
 
-**Status:** v11.2.0-mine.1 — vanilla retag of upstream `grafana/grafana-oss:11.2.0`. **Zero source-level patches at this tag.** The fork repo + image-on-Forgejo-registry exist for AGPL-source-archive + the git.binarybeach.io image-pin convention. Mirrors `bb-bulwark-fork` mine.1's same posture.
+**Status:** v11.2.0-mine.2 — first source patch on top of upstream `grafana/grafana-oss:11.2.0`: the `_bb_edge_sub` marker-cookie middleware required by the platform's per-app edge-identity validation convention. Prior tag `v11.2.0-mine.1` was a vanilla retag of upstream (bit-for-bit equivalent); see Tag history at the bottom of this file. The fork repo + image-on-Forgejo-registry continue to satisfy AGPL §13 source-availability for the `analytics.binarybeach.io` deployment.
 
 **License:** AGPLv3 (Grafana OSS relicensed Apache-2.0 → AGPLv3 in v10.3, April 2024). Per `feedback_default_private_fork_visibility` in the binarybeachio repo: AGPL forks default **public** on both Forgejo and the GitHub mirror.
 
@@ -20,16 +20,12 @@ binarybeachio fork of [grafana/grafana](https://github.com/grafana/grafana).
 
 ## What's customized
 
-| Path | Status | Conflict-risk on upstream merge |
-|------|--------|---------------------------------|
-| (none yet) | mine.1 is bit-for-bit equivalent to upstream `grafana/grafana-oss:11.2.0` | n/a |
-
-When the first source patch lands:
-- New file under `pkg/middleware/bb_edge_identity.go` (additive, MIT/AGPL-compatible)
-- One-line registration in `pkg/api/api.go` middleware chain
-- Cookie set in `pkg/login/social/connectors/generic_oauth_provider.go` after callback completes
-
-Skip-paths for the marker-cookie middleware: `/api/health`, `/login/generic_oauth`, `/public/*`, `/avatar/*`.
+| Path | Change | Lines | Conflict-risk on upstream merge |
+|------|--------|-------|---------------------------------|
+| `BINARYBEACHIO.md` | This file | ~140 | None — net-new file |
+| `pkg/middleware/bb_edge_identity.go` | NEW. Per-app edge-identity validation middleware. Reads `X-Auth-Request-User` header (set by oauth2-proxy at the platform edge) and `_bb_edge_sub` cookie (set at OIDC callback success). Three branches: header absent → pass through; cookie absent → lazy-populate; mismatch → revoke local `user_auth_token` row, clear `grafana_session` + `grafana_session_expiry` cookies, redirect to `/login` (which Traefik's `grafana-signin-redirect` middleware routes through the platform bridge for a fresh OIDC dance against the new edge identity). Skip-paths: `/login*`, `/logout`, `/public/*`, `/avatar/*`, `/api/live/*`. Per `docs/conventions/per-app-edge-identity-validation.md` in the binarybeachio repo. | ~135 | None — net-new file |
+| `pkg/api/http_server.go` | Register `BbEdgeIdentity` in the global middleware chain immediately after `ContextHandler.Middleware` (so `c.SignedInUser` / `c.UserToken` are populated) and before `OrgRedirect`. One `m.Use(...)` line + a doc-comment block. | ~10 | Low — additive insertion at a stable hand-off point in the chain |
+| `pkg/api/login_oauth.go` | At OIDC callback success (after `metrics.MApiLoginOAuth.Inc()`, before `authn.HandleLoginRedirect`), set the `_bb_edge_sub` cookie to the value of `X-Auth-Request-User`. Inert when the request didn't flow through oauth2-proxy. Also adds `pkg/middleware` import for the constant names. | ~12 | Low — additive at a single stable insertion point in `OAuthLogin` |
 
 ## Required runtime config
 
@@ -48,6 +44,13 @@ Break-glass (when SSO is broken or wrong identity locked in):
 https://analytics.binarybeach.io/login?disableAutoLogin=true
 ```
 + bb-admin from `_shared/.env.bb-admin` (the documented Grafana break-glass URL param).
+
+## Tag history
+
+| Tag | Status | What changed |
+|---|---|---|
+| `v11.2.0-mine.1` | superseded | Initial fork tag. Vanilla retag of upstream `grafana/grafana-oss:11.2.0` — image was `docker pull grafana/grafana-oss:11.2.0 && docker tag && docker push` to the Forgejo registry. Source repo carried only `BINARYBEACHIO.md` (no upstream tree, no patches). The Forgejo repo's git history was first populated for real at mine.2 — upstream `v11.2.0` rebased under the existing 2 BINARYBEACHIO.md commits. |
+| `v11.2.0-mine.2` | active | Per-app edge-identity validation per `docs/conventions/per-app-edge-identity-validation.md` in the binarybeachio repo. **Why**: when a user signs out at the platform edge via `bridge.binarybeach.io/logout` and signs back in as a different Zitadel identity, Grafana's `grafana_session` cookie survives the swap and short-circuits Grafana's OIDC dance — leaving the previous identity's data fully visible and interactive. Reproduced 2026-05-05 against `analytics.binarybeach.io` immediately after the T2.x identity-flip deploy: signed in as user A, signed out, signed in as user B, returned to Grafana → still saw user A; the grafana DB confirmed user B was never JIT'd because the `grafana_session` cookie short-circuited. **The patch** (3 files, ~157 lines net): (1) NEW `pkg/middleware/bb_edge_identity.go` — middleware comparing `X-Auth-Request-User` header to `_bb_edge_sub` cookie on every authenticated request; mismatch → `authTokenService.RevokeToken(ctx, userToken, false)` + `authn.DeleteSessionCookie` + clear `_bb_edge_sub` + 302 to `/login` (or 401 JSON for `/api/*`). (2) `pkg/api/http_server.go` — registers the middleware in the global chain after `ContextHandler.Middleware` so `c.SignedInUser` / `c.UserToken` are populated. (3) `pkg/api/login_oauth.go` — at OAuth callback success, sets the `_bb_edge_sub` cookie to the value of `X-Auth-Request-User` so subsequent requests are guarded. **Why this layer is needed despite oauth2-proxy revoking on Zitadel deactivation**: oauth2-proxy's revoke-on-refresh-fail covers the deactivation case (request never reaches Grafana), but **active identity-switching** carries a *valid* edge cookie for a *different* identity than the existing app session. The marker cookie is the only way to detect that mismatch from inside the app process. The companion sign-out half (Grafana's user-menu → `bridge.binarybeach.io/logout`) was already wired in mine.1 via the native `GF_AUTH_SIGNOUT_REDIRECT_URL` env knob — no fork patch needed for that half. |
 
 ## Refresh from upstream
 

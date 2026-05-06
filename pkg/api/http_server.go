@@ -631,6 +631,16 @@ func (hs *HTTPServer) addMiddlewaresAndStaticRoutes() {
 	m.Use(hs.frontendLogEndpoints())
 
 	m.UseMiddleware(hs.ContextHandler.Middleware)
+
+	// binarybeachio: per-app edge-identity validation. Runs after
+	// ContextHandler so c.SignedInUser / c.UserToken are populated.
+	// Compares _bb_edge_sub cookie to X-Auth-Request-User header and
+	// invalidates the Grafana session on mismatch. See
+	// pkg/middleware/bb_edge_identity.go and
+	// docs/conventions/per-app-edge-identity-validation.md (in
+	// binarybeachio repo).
+	m.Use(middleware.BbEdgeIdentity(hs.Cfg, hs.AuthTokenService))
+
 	m.Use(middleware.OrgRedirect(hs.Cfg, hs.userService))
 
 	// needs to be after context handler
