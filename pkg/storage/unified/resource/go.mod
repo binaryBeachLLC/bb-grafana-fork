@@ -1,6 +1,6 @@
 module github.com/grafana/grafana/pkg/storage/unified/resource
 
-go 1.22.4
+go 1.23
 
 require (
 	github.com/fullstorydev/grpchan v1.1.1
@@ -12,7 +12,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.28.0
 	gocloud.dev v0.25.0
 	google.golang.org/grpc v1.65.0
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.36.11
 	k8s.io/apimachinery v0.31.0-rc.1
 )
 
