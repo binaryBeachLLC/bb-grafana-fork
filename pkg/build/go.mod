@@ -1,6 +1,6 @@
 module github.com/grafana/grafana/pkg/build
 
-go 1.22.4
+go 1.25.0
 
 // Override docker/docker to avoid:
 // go: github.com/drone-runners/drone-runner-docker@v1.8.2 requires
@@ -43,7 +43,7 @@ require (
 	golang.org/x/oauth2 v0.21.0 // @grafana/identity-access-team
 	golang.org/x/sync v0.8.0 // indirect; @grafana/alerting-backend
 	golang.org/x/text v0.17.0 // indirect; @grafana/grafana-backend-group
-	golang.org/x/time v0.5.0 // indirect; @grafana/grafana-backend-group
+	golang.org/x/time v0.15.0 // indirect; @grafana/grafana-backend-group
 	golang.org/x/tools v0.22.0 // indirect; @grafana/grafana-as-code
 	google.golang.org/api v0.176.0 // @grafana/grafana-backend-group
 	google.golang.org/grpc v1.65.0 // indirect; @grafana/plugins-platform-backend
