@@ -1,6 +1,6 @@
 module github.com/grafana/grafana
 
-go 1.22.4
+go 1.23.0
 
 // contains openapi encoder fixes. remove ASAP
 replace cuelang.org/go => github.com/grafana/cue v0.0.0-20230926092038-971951014e3f // @grafana/grafana-as-code
@@ -28,7 +28,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.0 // @grafana/grafana-release-guild
 	github.com/Masterminds/sprig/v3 v3.2.3 // @grafana/grafana-backend-group
 	github.com/Masterminds/squirrel v1.5.4 // @grafana/identity-access-team
-	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // @grafana/plugins-platform-backend
+	github.com/ProtonMail/go-crypto v1.4.1 // @grafana/plugins-platform-backend
 	github.com/VividCortex/mysqlerr v0.0.0-20170204212430-6c6b55f8796f // @grafana/grafana-backend-group
 	github.com/alicebob/miniredis/v2 v2.33.0 // @grafana/alerting-backend
 	github.com/andybalholm/brotli v1.0.6 // @grafana/partner-datasources
@@ -171,15 +171,15 @@ require (
 	go.uber.org/atomic v1.11.0 // @grafana/alerting-backend
 	go.uber.org/goleak v1.3.0 // @grafana/grafana-search-and-storage
 	gocloud.dev v0.25.0 // @grafana/grafana-app-platform-squad
-	golang.org/x/crypto v0.26.0 // @grafana/grafana-backend-group
+	golang.org/x/crypto v0.41.0 // @grafana/grafana-backend-group
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // @grafana/alerting-backend
-	golang.org/x/mod v0.18.0 // indirect; @grafana/grafana-backend-group
-	golang.org/x/net v0.28.0 // @grafana/oss-big-tent @grafana/partner-datasources
+	golang.org/x/mod v0.26.0 // indirect; @grafana/grafana-backend-group
+	golang.org/x/net v0.42.0 // @grafana/oss-big-tent @grafana/partner-datasources
 	golang.org/x/oauth2 v0.21.0 // @grafana/identity-access-team
-	golang.org/x/sync v0.8.0 // @grafana/alerting-backend
-	golang.org/x/text v0.17.0 // @grafana/grafana-backend-group
+	golang.org/x/sync v0.16.0 // @grafana/alerting-backend
+	golang.org/x/text v0.28.0 // @grafana/grafana-backend-group
 	golang.org/x/time v0.5.0 // @grafana/grafana-backend-group
-	golang.org/x/tools v0.22.0 // @grafana/grafana-as-code
+	golang.org/x/tools v0.35.0 // @grafana/grafana-as-code
 	gonum.org/v1/gonum v0.14.0 // @grafana/observability-metrics
 	google.golang.org/api v0.176.0 // @grafana/grafana-backend-group
 	google.golang.org/grpc v1.65.0 // @grafana/plugins-platform-backend
@@ -260,7 +260,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/chromedp/cdproto v0.0.0-20240426225625-909263490071 // indirect
-	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cloudflare/circl v1.6.2 // indirect
 	github.com/cockroachdb/apd/v2 v2.0.2 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
@@ -444,8 +444,8 @@ require (
 	go.uber.org/mock v0.4.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // @grafana/identity-access-team
-	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/term v0.23.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/term v0.34.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect; @grafana/grafana-backend-group
 	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094 // indirect
